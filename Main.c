@@ -2,75 +2,70 @@
 #include <stdlib.h>
 #include <inttypes.h>
 
-#define foreach(var, begin)            \
-{                                      \
-    Node *iterator = begin;            \
-    while (iterator != NULL)           \
-    {                                  \
-        int32_t var = iterator->value; \
-        iterator = iterator->next;
-#define endforeach() }}
-
 typedef struct Node Node;
 
 struct Node
 {
     int32_t value;
-    Node    *preview;
-    Node    *next;
+    Node *prev;
+    Node *next;
 };
 
-void FreeNodes(Node **head)
+void FreeNodes(Node *head)
 {
-    Node *node = *head;
+    Node *node = head;
 
-    while (node == NULL)
+    while (node != NULL)
     {
         Node *temp = node;
         node = node->next;
         free(temp);
     }
-
-    *head = NULL;
 }
 
-int32_t main()
+int main()
 {
     Node *head = NULL;
-    Node **index = &head;
+    Node *last = NULL;
     size_t count;
-    int32_t number;
 
     printf("How many nodes do you want?\n> ");
     scanf("%lu", &count);
 
-    for (size_t i = 0 ; i < count ; ++i)
+    Node *prev_node = NULL;
+    for (size_t i = 0; i < count; ++i)
     {
-        printf("It: %lu\n", i);
-        *index = malloc(sizeof(Node));
+        Node *new_node = malloc(sizeof(Node));
+        new_node->value = i + 1;
+        new_node->prev = prev_node;
+        new_node->next = NULL;
 
-        Node *temp = &(**index);
-
-        (**index).value = i + 1;
-
-        if(i == 0)
+        if (prev_node != NULL)
         {
-            (**index).preview = NULL;
+            prev_node->next = new_node;
         }
         else
         {
-            *index = (**index).next;
-            (**index).preview = temp;
+            head = new_node;
         }
+
+        prev_node = new_node;
     }
 
-    // foreach(number, head)
-    // {
-    //     printf("Value: %d", number);
-    // }
-    // endforeach()
+    for (Node *node = head ; node != NULL ; node = node->next)
+    {
+        printf("Value: %d\n", node->value);
+        last = node;
+    }
 
-    FreeNodes(&head);
+    puts("\nList in reverse");
+
+    for (Node *node = last ; node != NULL ; node = node->prev)
+    {
+        printf("Value: %d\n", node->value);
+    }
+
+    FreeNodes(head);
 
     return EXIT_SUCCESS;
 }
